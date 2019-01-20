@@ -34,21 +34,21 @@ svg.append("text").text("AGE").attr({
     "dx": 10
 });
 
-svg.append("text").text("MALES").attr({
+svg.append("text").text("Human_Drives").attr({
     x: LABEL_WIDTH,
     y: MARGIN_TOP + 14,
     fill: "#1f77b4"
 });
 
-svg.append("text").text("FEMALES").attr({
+svg.append("text").text("AVs").attr({
     x: WIDTH,
     y: MARGIN_TOP + 14,
     fill: "#ff7f0e",
     "text-anchor": "end"
 });
 
-var COLNAMES = [ "Timestamp", "1 Gender", "2 Age", "3. Usual location (Town/City)", "4 Twitter username", "5 Approximate year and month when you first became interested in data visualisation", "6 The focus of your data visualisation interest?", "7 The extent of your data visualisation interest?" ];
-var GENDER = COLNAMES[1], AGE = COLNAMES[2], LOCATION = COLNAMES[3], TWITTER = COLNAMES[4], SINCE = COLNAMES[5], FOCUS = COLNAMES[6], INTEREST = COLNAMES[7];
+var COLNAMES = [ "Timestamp", "1 type", "2 safety"];
+var GENDER = COLNAMES[1], AGE = COLNAMES[2];
 
 var drawD3Document = function(data) {
     data = cleanup(data);
@@ -73,12 +73,12 @@ var drawD3Document = function(data) {
             label: d.key
         };
         for (var i = 0; i < d.values.length; i++) {
-            output[d.values[i].key.toLowerCase()] = d.values[i].values;
+            output[d.values[i].key] = d.values[i].values;
         }
-        output.male = output.male || 0;
-        output.female = output.female || 0;
-        output.maleRatio = output.male / (output.male + output.female);
-        output.femaleRatio = output.female / (output.male + output.female);
+        output.Human_Drive = output.Human_Drive || 0;
+        output.AV = output.AV || 0;
+        output.maleRatio = output.Human_Drive / (output.Human_Drive + output.AV);
+        output.femaleRatio = output.AV / (output.Human_Drive + output.AV);
         return output;
     });
 
@@ -99,12 +99,12 @@ function render() {
             transform: " translate(" + (-(WIDTH - LABEL_WIDTH) / 2 - LABEL_WIDTH) + "," + ROW_HEIGHT + ") scale(.85)"
         });
         row.append("rect").attr({
-            "class": "male",
+            "class": "Human_Drive",
             fill: "#1f77b4",
             height: ROW_HEIGHT - .5
         });
         row.append("rect").attr({
-            "class": "female",
+            "class": "AV",
             fill: "#ff7f0e",
             height: ROW_HEIGHT - .5
         });
@@ -126,7 +126,7 @@ function relativeSize(row, entries) {
     maleAxis.ticks(4).tickFormat(function(val) {
         return val * 100 + "%";
     });
-    row.select(".male").attr({
+    row.select(".Human_Drive").attr({
         width: function(d) {
             return maleScale(0) - maleScale(d.maleRatio);
         },
@@ -134,7 +134,7 @@ function relativeSize(row, entries) {
             return maleScale(d.maleRatio);
         }
     });
-    row.select(".female").attr({
+    row.select(".AV").attr({
         width: function(d) {
             return femaleScale(d.femaleRatio) - femaleScale(0);
         },
@@ -146,23 +146,23 @@ function relativeSize(row, entries) {
 
 function absoluteSize(row, entries) {
     var max = d3.max(entries, function(d) {
-        return Math.max(d.female, d.male);
+        return Math.max(d.AV, d.Human_Drive);
     });
     femaleScale.domain([ 0, max ]).range([ 0, (WIDTH - LABEL_WIDTH) / 2 ]);
     maleScale.domain([ 0, max ]).range([ 0, -(WIDTH - LABEL_WIDTH) / 2 ]);
     femaleAxis.ticks(10).tickFormat(null);
     maleAxis.ticks(10).tickFormat(null);
-    row.select(".male").attr({
+    row.select(".Human_Drive").attr({
         width: function(d) {
-            return maleScale(0) - maleScale(d.male);
+            return maleScale(0) - maleScale(d.Human_Drive);
         },
         x: function(d) {
-            return maleScale(d.male);
+            return maleScale(d.Human_Drive);
         }
     });
-    row.select(".female").attr({
+    row.select(".AV").attr({
         width: function(d) {
-            return femaleScale(d.female) - femaleScale(0);
+            return femaleScale(d.AV) - femaleScale(0);
         },
         x: function(d) {
             return femaleScale(0);
@@ -174,7 +174,7 @@ function cleanup(data) {
     data = data.filter(function(d) {
         var gender = d[GENDER];
         var age = d[AGE];
-        return (gender == "Male" || gender == "Female") && parseInt(age).toString() == age;
+        return (gender == "Human_Drive" || gender == "AV") && parseInt(age).toString() == age;
     });
     //data.forEach(function(d) {});
     return data;
@@ -183,7 +183,7 @@ var credits = d3.select("#canvas-svg").append("div").style('width', WIDTH + 20 +
 credits.append("div").html('Quickly made by: <a href="http://twitter.com/meetamit">@meetamit</a>').style('float','right');
 credits.append("div").html('Source: <a href="http://www.visualisingdata.com/index.php/2013/03/1578-responses-to-the-first-data-visualisation-census/">Data Visualization Census 2013</a>');
 
-d3.csv("data.csv")
+d3.csv("data2.csv")
     .get(function(error, data) {
         drawD3Document(data)
     });
